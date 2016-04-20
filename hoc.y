@@ -59,6 +59,7 @@ int lineno = 1;
 void fpecatch();
 void warning(char *s, char *t);
 
+int
 main(int argc, char **argv)
 {
 	progname = argv[0];

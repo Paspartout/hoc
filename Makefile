@@ -1,8 +1,9 @@
 YACC=byacc
 LDFLAGS=-static
+LIBS=-lm
 
 hoc: hoc.o
-	cc hoc.o -o hoc
+	cc ${LDFLAGS} hoc.o -o hoc ${LIBS}
 
 clean:
 	@rm -f hoc hoc.o
