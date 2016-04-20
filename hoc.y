@@ -15,6 +15,7 @@ double mem[26];
 %left	'%'
 %left	'+' '-'
 %left	'*' '/'
+%left	'^'
 %left	UNARYMINUS
 %%
 
@@ -31,6 +32,7 @@ expr:	  NUMBER
 	| expr '+' expr	{ $$ = $1 + $3; }
 	| expr '-' expr	{ $$ = $1 - $3; }
 	| expr '*' expr	{ $$ = $1 * $3; }
+	| expr '^' expr	{ $$ = pow($1, $3); }
 	| expr '/' expr	{ 
 		if ($3 == 0.0)
 			execerror("division by zero", "");		
