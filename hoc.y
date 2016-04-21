@@ -8,6 +8,7 @@ double mem[26];
 
 %token	<val>	NUMBER
 %token	<index>	VAR
+%token		EXTERM
 %type	<val>	expr
 
 %right	'='
@@ -20,9 +21,11 @@ double mem[26];
 %%
 
 list:
-	| list '\n'
-	| list expr '\n'	{ printf("\t%.8g\n", $2); }
-	| list error '\n'	{ yyerrok; }
+	| list EXTERM
+	| list expr EXTERM	{ 
+			mem['p' - 'a'] = $2;
+			printf("\t%.8g\n", $2); }
+	| list error EXTERM	{ yyerrok; }
 	;
 
 expr:	  NUMBER
@@ -77,7 +80,8 @@ execerror(char *s, char *t)
 	longjmp(begin, 0);
 }
 
-void fpecatch()
+void
+fpecatch()
 {
 	execerror("floating point exception", (char *)0);
 }
@@ -104,8 +108,13 @@ yylex()
 		return VAR;
 	}
 	
-	if (c == '\n')
+	if (c == ';')
+		return EXTERM;
+
+	if (c == '\n') {
 		lineno++;
+		return EXTERM;
+	}
 
 	return c;
 }
