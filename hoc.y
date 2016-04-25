@@ -1,37 +1,38 @@
 %{
-double mem[26];
+#include "hoc.h"
+extern double Pow();
 %}
-%union {		/* stack type */
+%union {
 	double val;	/* actual value */
-	int index;	/* index to mem[] */
+	Symbol *sym;	/* symbol table pointer */
 }
 
 %token	<val>	NUMBER
-%token	<index>	VAR
+%token	<sym>	VAR BLTIN UNDEF
 %token		EXTERM
-%type	<val>	expr
+%type	<val>	expr asgn
 
 %right	'='
-
 %left	'%'
 %left	'+' '-'
 %left	'*' '/'
-%left	'^'
 %left	UNARYMINUS
+%right	'^'
 %%
-
 list:
 	| list EXTERM
-	| list expr EXTERM	{ 
-			mem['p' - 'a'] = $2;
-			printf("\t%.8g\n", $2); }
+	| list asgn EXTERM
+	| list expr EXTERM	{ printf("\t%.8g\n", $2); }
 	| list error EXTERM	{ yyerrok; }
 	;
-
+asgn:	  VAR '=' expr { $$ = $1->u.val=$3; $1->type = VAR; }
+	;
 expr:	  NUMBER
-	| VAR		{ $$ = mem[$1]; }
-	| VAR '=' expr	{ $$ = mem[$1] = $3; }
-	| '-' expr %prec UNARYMINUS { $$ = -$2; }
+	| VAR		{ if ($1->type == UNDEF) 
+				execerror("undefined variable", $1->name);
+				$$ = $1.val; }
+	| asgn
+	| BLTIN '(' expr ')' { $$ = (*($1->u.ptr))($3); }
 	| expr '+' expr	{ $$ = $1 + $3; }
 	| expr '-' expr	{ $$ = $1 - $3; }
 	| expr '*' expr	{ $$ = $1 * $3; }
@@ -46,6 +47,7 @@ expr:	  NUMBER
 		b = $3; 
 		$$ = a % b; }
 	| '(' expr ')'	{ $$ = $2; }
+	| '-' expr %prec UNARYMINUS { $$ = -$2; }
 	;
 %%
 
