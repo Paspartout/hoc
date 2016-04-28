@@ -1,6 +1,9 @@
-YACC=byacc
-LDFLAGS=-static
-LIBS=-lm
+YACC :=		byacc
+LDFLAGS :=	-static
+CFLAGS :=	-Os
+LIBS :=		-lm
+
+PREFIX ?= ~
 
 hoc: hoc.o
 	cc ${LDFLAGS} hoc.o -o hoc ${LIBS}
@@ -8,4 +11,12 @@ hoc: hoc.o
 clean:
 	@rm -f hoc hoc.o
 
-.PHONY: clean
+install:
+	@mkdir -p ${DESTDIR}${PREFIX}/bin
+	@cp hoc -f ${DESTDIR}${PREFIX}/bin
+	@chmod 755  ${DESTDIR}${PREFIX}/bin/hoc
+
+uninstall:
+	@rm -f ${DESTDIR}${PREFIX}/bin/hoc
+
+.PHONY: clean install
